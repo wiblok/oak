@@ -1,23 +1,22 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { Joi } from "https://deno.land/x@v1.9/djwt/mod.ts";
 
 const router = new Router();
 
 router.post("/users", async (context) => {
-  const schema = Joi.object({
-    name: Joi.string().required(),
-    age: Joi.number().required(),
-  });
-
-  const { value, error } = schema.validate(await context.request.body().value);
-
-  if (error) {
+  const requestBody = await context.request.body().value;
+  console.log(requestBody);
+  if (
+    !requestBody.name ||
+    typeof requestBody.name !== "string" ||
+    !requestBody.age ||
+    typeof requestBody.age !== "number"
+  ) {
     context.response.status = 400;
-    context.response.body = { error: error.details[0].message };
+    context.response.body = { error: "Invalid request body" };
     return;
   }
 
-  const { name, age } = value;
+  const { name, age } = requestBody;
 
   // バリデーションが成功した場合の処理
   context.response.body = { message: "User created successfully", name, age };
